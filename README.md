@@ -1,4 +1,4 @@
-<img src="https://www.paymee.io/img/logo.png" alt="Paymee" width="300px">
+<img src="https://www.paymee.io/img/githublogo.png" alt="Paymee" width="300px">
 
 Paymee is a payment solution for everyone. 
 
