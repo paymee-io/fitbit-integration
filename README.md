@@ -1,4 +1,4 @@
-[Paymee](https://www.paymee.io/img/logo.png "paymee.io")
+![Paymee](https://www.paymee.io/img/logo.png "paymee.io")
 
 # Paymee Fitbit Integration
 
