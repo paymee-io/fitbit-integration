@@ -1,4 +1,4 @@
-![Paymee](https://www.paymee.io/img/logo.png | width=300 "paymee.io")
+<img src="https://www.paymee.io/img/logo.png" alt="Paymee" width="300px">
 
 # Paymee Fitbit Integration
 
