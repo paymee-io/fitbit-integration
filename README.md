@@ -20,20 +20,23 @@ You can use [Paymee](https://paymee.io) as a payment solution for any watchface 
 Follow the next steps to integrate the payment solution to your app:
 
 ## 1. Create a new product
-Login to [Paymee](https://paymee.io) and add a new product using the sidebar link.
+[Login](https://paymee.io/login) or [register](https://paymee.io/register) an account with [Paymee](https://paymee.io) and add a new product.
 
-## 2. Generate fitbit code
-Click on the new app from the list, then click generate fitbit code.
+## 2. Get the product UID
+Click on the new added product from the list, then click on UID.
 
 ## 3. Integrate in fitbit app/watchface
-Copy the following files to:
-* app/paymee.js
-* companion/index.js
-* resources/paymee.gui
-* Update resources/index.gui by adding the <use id="paymee"/> at the end of your file.
+Copy or clone this repository into your app. 
+The following files need to be updated:
+
+* app/index.js (Import paymee.js and start payment)
+* app/paymee.js (Device - companion communication)
+* companion/index.js (Companion - Server communication)
+* resources/paymee.gui (Paymee HTML)
+* resources/index.gui (Add Paymee <use> tag)
 
 
 # Contact
 
 * Website: [https://paymee.io](https://paymee.io)
-* Send us an email: [support@paymee.io](mailto:support@paymee.io)
+* Support email: [support@paymee.io](mailto:support@paymee.io)
