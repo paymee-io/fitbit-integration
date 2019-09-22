@@ -1,0 +1,7 @@
+<svg>
+
+
+
+  <!-- ADD PAYMEE USE TAG AT THE END OF YOUR index.gui FILE -->
+  <use href="#paymee" />
+</svg>
