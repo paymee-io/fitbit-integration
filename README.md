@@ -32,8 +32,9 @@ The following files need to be updated:
 * app/index.js (Import paymee.js and start payment)
 * app/paymee.js (Device - companion communication)
 * companion/index.js (Companion - Server communication)
-* resources/paymee.gui (Paymee HTML)
-* resources/index.gui (Add Paymee <use> tag)
+* resources/paymee.gui (Paymee - UI File)
+* resources/index.gui (Add <use href="#paymee" /> tag)
+* resources/widgets.gui (Import paymee.gui)
 
 
 # Contact
