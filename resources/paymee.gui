@@ -1,0 +1,15 @@
+<defs>
+  <symbol id="paymee">
+    <rect id="paymee-bg" fill="black" width="100%" height="100%" x="0" y="0" opacity="0"/>
+    <textarea id="paymee-textarea" y="15" width="100%" height="100%" font-family="Colfax-Medium" font-size="20" text-anchor="middle" fill="white" opacity="0" text-length="150">This is a paid product.
+Checking for test...</textarea>
+    <g transform="translate(50%, 50%)" id="paymee-loader" opacity="0">
+        <arc x="-25" y="-25" width="50" height="50" fill="lightgrey" arc-width="5" start-angle="0" sweep-angle="60">
+            <animate attributeName="start-angle" begin="load" from="0" to="360" dur="3" final="restore" repeatCount="indefinite"/>
+            <animate attributeName="sweep-angle" begin="load" from="60" to="360" dur="3" final="restore" repeatCount="indefinite"/>
+        </arc>
+    </g>
+    <image id="paymee-qr" fill="blue" href="" width="140" height="140" x="50%-70" y="30%" opacity="0"/>
+    <textarea id="paymee-bottom-textarea" y="100%-30" font-family="Colfax-Medium" width="100%" height="100%" font-size="20" text-anchor="middle" fill="white" opacity="0" text-length="150">paymee.io/pay</textarea>
+  </symbol>
+</defs>
