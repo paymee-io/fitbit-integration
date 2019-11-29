@@ -5,41 +5,39 @@ import * as jpeg from "jpeg";
 import * as fs from "fs";
 
 export var paymentCheck, paymentId;
-export var json_object = {};
+export var payment_settings = {};
 
 messaging.peerSocket.addEventListener("open", () => {
   try { 
-    json_object  = fs.readFileSync("json.txt", "json"); 
-    //console.log("Stored settings PAYMENT STATUS: "+JSON.stringify(json_object));
+    payment_settings  = fs.readFileSync("payment_settings.txt", "json"); 
   } 
   catch(e) {
-    json_object.paymentid = "0";
-    fs.writeFileSync("json.txt", json_object, "json");
+    payment_settings.paymentid = "0";
+    fs.writeFileSync("payment_settings.txt", payment_settings, "json");
   }
-  if (!json_object.payment || !json_object.payment.status) showPaymentOverlay();
-  messaging.peerSocket.send(json_object);
+  if (!payment_settings.payment || !payment_settings.payment.status) showPaymentOverlay();
+  messaging.peerSocket.send(payment_settings);
 });
 
 inbox.onnewfile = () => {
-  //console.log("Received QR Code file");
   let qrCode;
   do {
     qrCode = inbox.nextFile();
     if (qrCode) {
-      if (json_object.bg && json_object.bg !== "") {
-        try { fs.unlinkSync(json_object.bg); }
+      if (payment_settings.bg && payment_settings.bg !== "") {
+        try { fs.unlinkSync(payment_settings.bg); }
         catch(e){}
       }
       let newPath = qrCode + ".txi";
       jpeg.decodeSync(qrCode, newPath, true);
       fs.unlinkSync(qrCode);
-      json_object.bg = `/private/data/${newPath}`;
-      setQrImage(json_object.bg);
+      payment_settings.bg = `/private/data/${newPath}`;
+      setQrImage(payment_settings.bg);
 
-      if (!json_object.payment || !json_object.payment.status) showPaymentOverlay();
+      if (!payment_settings.payment || !payment_settings.payment.status) showPaymentOverlay();
       
-      json_object.lastDownload = new Date().valueOf();
-      fs.writeFileSync("json.txt", json_object, "json");
+      payment_settings.lastDownload = new Date().valueOf();
+      fs.writeFileSync("payment_settings.txt", payment_settings, "json");
     }
   } while (qrCode);
 };
@@ -47,34 +45,27 @@ inbox.onnewfile = () => {
 export function startPayment() {  
   paymentCheck = '';
   
-  try { json_object  = fs.readFileSync("json.txt", "json"); } 
+  try { payment_settings  = fs.readFileSync("payment_settings.txt", "json"); } 
   catch(e) {
     showPaymentOverlay();
-    //console.log('No settings found. Sending request to companion...');
-    json_object.paymentid = "123456789";
-    fs.writeFileSync("json.txt", json_object, "json");
+    payment_settings.paymentid = "123456789";
+    fs.writeFileSync("payment_settings.txt", payment_settings, "json");
   }
   
-  
-  //PAYMENT SETTINGS ARE SAVED, CHECK IF PAID OR TRY READING STATUS INTERVAL 3000ms
-  if (json_object.payment) {
+  if (payment_settings.payment) {
     
-    if (json_object.payment.status == 1) hidePaymentOverlay();
+    if (payment_settings.payment.status == 1) hidePaymentOverlay();
     else showPaymentOverlay();
     
     paymentCheck = setInterval(function(){
-      json_object  = fs.readFileSync("json.txt", "json");
-      if (json_object.payment) {
-        
-        //PAYMENT HAS BEEN MADE
-        if (json_object.payment.status == 1) {
+      payment_settings  = fs.readFileSync("payment_settings.txt", "json");
+      if (payment_settings.payment) {
+        if (payment_settings.payment.status == 1) {
           hidePaymentOverlay();
           clearInterval(paymentCheck);
         }
       }
     },3000);
-    
-    
   }
 }
 
@@ -82,40 +73,35 @@ messaging.peerSocket.onmessage = function(evt) {
     var txtElem = document.getElementById("paymee-textarea");
     var bottomTxtElem = document.getElementById("paymee-bottom-textarea");
   
-    if (json_object.bg) setQrImage(json_object.bg);
-    if (json_object.qrid) bottomTxtElem.text = "paymee.io/pay/"+json_object.qrid;
-    if (json_object.price) txtElem.text = "This is a paid product.\nPrice: $"+json_object.price;
-    //console.log("Watch received message: "+ evt.data.payment.id);
+    if (payment_settings.bg) setQrImage(payment_settings.bg);
+    if (payment_settings.qrid) bottomTxtElem.text = "paymee.io/pay/"+payment_settings.qrid;
+    if (payment_settings.price) txtElem.text = "This is a paid product.\nPrice: $"+payment_settings.price;
+  
     if(evt.data) {
       if (evt.data.payment.id) {
           var bottomTxtElem = document.getElementById("paymee-bottom-textarea");
           bottomTxtElem.text = "paymee.io/pay/"+evt.data.payment.id;
-        
       }
-      if (evt.data.image) {
-        console.log("WATCH RECEIVED IMAGE: "+evt.data.image);
-        setQrImage(evt.data.image);
-      }
+      
+      if (evt.data.image) setQrImage(evt.data.image);
       if (!evt.data.payment) return;
       
-      json_object = {
+      payment_settings = {
         "payment" : evt.data.payment,
         "paymentid" : evt.data.payment.paymentid,
         "qrid" : evt.data.payment.id,
         "price" : evt.data.payment.price
       };
       
-      fs.writeFileSync("json.txt", json_object, "json");
+      fs.writeFileSync("payment_settings.txt", payment_settings, "json");
       
-      if (json_object.payment.status == 1) {
-        console.log("Status is Paid, hiding overlay");
+      if (payment_settings.payment.status == 1) {
         hidePaymentOverlay();
         return;
       }
       showPaymentOverlay();
     }
   }
-
 
 export function showPaymentOverlay() {
     var loaderElem = document.getElementById("paymee-loader");
@@ -124,9 +110,9 @@ export function showPaymentOverlay() {
     var txtElem = document.getElementById("paymee-textarea");
     var bottomTxtElem = document.getElementById("paymee-bottom-textarea");
   
-    if (json_object.bg) setQrImage(json_object.bg);
-    if (json_object.qrid) bottomTxtElem.text = "paymee.io/pay/"+json_object.qrid;
-    if (json_object.price) txtElem.text = "This is a paid product.\nPrice: $"+json_object.price;
+    if (payment_settings.bg) setQrImage(payment_settings.bg);
+    if (payment_settings.qrid) bottomTxtElem.text = "paymee.io/pay/"+payment_settings.qrid;
+    if (payment_settings.price) txtElem.text = "This is a paid product.\nPrice: $"+payment_settings.price;
   
     loaderElem.style.opacity = 1;
     bgElem.style.opacity = 0.85;
