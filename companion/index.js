@@ -5,55 +5,63 @@ import { outbox } from "file-transfer";
 import { Image } from "image";
 import * as fs from "fs";
 
-const PRODUCT_ID = "YOUR_PRODUCT_UID";
-
+const PRODUCT_ID = "REPLACE_YOUR_PAYMEE_PRODUCT_UID";
 let storedPaymentId = '';
 let paid = 0;
 let checkPaid = '';
+let storedQrid = settingsStorage.getItem('qrid');
+
+if (storedQrid != null) getQR(storedQrid);
 
 messaging.peerSocket.addEventListener("open", () => {
   console.log("Communication onOpen called!");
 });
 messaging.peerSocket.addEventListener("message", (evt) => {
-  //data from fibit to companion app
   let msg = evt.data;  
-  console.log("Communication onMessage called: " + JSON.stringify(msg));
-  checkPaymentStatus();
+  console.log("Communication onMessage called!");
+  if (msg) checkPaymentStatus(msg);
 });
 messaging.peerSocket.addEventListener("close", (evt) => {
-  console.log("Communication onClose called: " + JSON.stringify(evt));
+  console.log("Communication onClose called!");
 });
 messaging.peerSocket.addEventListener("error", (err) => {
   console.log("Communication onError called: " + err.code + " - " + err.message);
 });
- 
-//console.log('PAID STATUS STORED: '+paid);
+
 if (paid == 0) {
   checkPaid = setInterval(function(){ checkPaymentStatus(); },3000);
-  setTimeout(function(){getQR();},3000);
 }
 
-function checkPaymentStatus() {  
-  fetch('https://paymee.io/api/payments/create?id='+PRODUCT_ID+'&paymentid='+settingsStorage.getItem('paymentid') )
+function checkPaymentStatus(exdata = null) {  
+  if (exdata != null) {
+    if (exdata.payment == undefined || exdata.payment == null) return;
+  }
+  var storedid = settingsStorage.getItem('paymentid');
+  if (storedid == null) storedid = "";
+  if (PRODUCT_ID == "REPLACE_YOUR_PAYMEE_PRODUCT_UID") console.log("Please update the PRODUCT_ID in companion/index.js line 8");
+  fetch('https://paymee.io/api/payments/create?id='+PRODUCT_ID+'&paymentid='+storedid )
   .then(function(res) { return res.text(); })
   .then(function(response){
     var result = JSON.parse(response);
     paid = result.status;
-    //console.log("Payment ID "+result.paymentid+"; Status: "+paid+"; QR Code ID: "+result.id);
-    
     settingsStorage.setItem('payment', result);
     settingsStorage.setItem('paymentid', result.paymentid);
     settingsStorage.setItem('qrid',result.id);
     
+    var exFile = settingsStorage.getItem('filename');
+    if (!exFile) getQR(result.id);
+    
     if (messaging.peerSocket.readyState === messaging.peerSocket.OPEN) messaging.peerSocket.send({'payment' : result});
     else messaging.peerSocket.send({'payment' : result});
-    if (paid == 1) clearInterval(checkPaid);
     
+    if (paid == 1) clearInterval(checkPaid);
   });
 }
 
-function getQR() {
-  fetch('https://paymee.io/qr/'+settingsStorage.getItem('qrid') )
+function getQR(myqrid = null) {
+  if (myqrid == null) return;
+  
+  fetch('https://paymee.io/qr/'+myqrid )
     .then(response => { return response.arrayBuffer(); })
     .then(buffer => Image.from(buffer, "image/jpeg"))
     .then(image =>  image.export("image/jpeg", {
@@ -61,6 +69,6 @@ function getQR() {
     }))
     .then(buffer => outbox.enqueue(`${Date.now()}.jpg`, buffer))
     .then(fileTransfer => {
-      console.log(`Sent file:`+fileTransfer.name);
+      settingsStorage.setItem('filename',fileTransfer.name);
     });
 }
