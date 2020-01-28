@@ -18,6 +18,7 @@ messaging.peerSocket.addEventListener("open", () => {
 });
 messaging.peerSocket.addEventListener("message", (evt) => {
   let msg = evt.data;  
+  settingsStorage.setItem('device', msg.device);
   console.log("Communication onMessage called!");
   if (msg) checkPaymentStatus(msg);
 });
@@ -33,13 +34,18 @@ if (paid == 0) {
 }
 
 function checkPaymentStatus(exdata = null) {  
+  var device = settingsStorage.getItem('device');
   if (exdata != null) {
     if (exdata.payment == undefined || exdata.payment == null) return;
+	if (exdata.device) {
+      device = exdata.device;
+      settingsStorage.setItem('device', device);
+    }
   }
   var storedid = settingsStorage.getItem('paymentid');
   if (storedid == null) storedid = "";
-  if (PRODUCT_ID == "REPLACE_YOUR_PAYMEE_PRODUCT_UID") console.log("Please update the PRODUCT_ID in companion/index.js line 8");
-  fetch('https://paymee.io/api/payments/create?id='+PRODUCT_ID+'&paymentid='+storedid )
+  
+  fetch('https://paymee.io/api/payments/create?id='+PRODUCT_ID+'&paymentid='+storedid+'&dtype='+device )
   .then(function(res) { return res.text(); })
   .then(function(response){
     var result = JSON.parse(response);
