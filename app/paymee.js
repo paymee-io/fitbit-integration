@@ -1,4 +1,6 @@
 import document from "document";
+import { me as device } from "device";
+import { vibration } from "haptics";
 import { inbox } from "file-transfer";
 import * as messaging from 'messaging';
 import * as jpeg from "jpeg";
@@ -16,6 +18,7 @@ messaging.peerSocket.addEventListener("open", () => {
     fs.writeFileSync("payment_settings.txt", payment_settings, "json");
   }
   if (!payment_settings.payment || !payment_settings.payment.status) showPaymentOverlay();
+  payment_settings.device = device.modelName;
   messaging.peerSocket.send(payment_settings);
 });
 
@@ -128,12 +131,12 @@ export function hidePaymentOverlay() {
     var bgElem = document.getElementById("paymee-bg");
     var txtElem = document.getElementById("paymee-textarea");
     var bottomTxtElem = document.getElementById("paymee-bottom-textarea");
-  
-    loaderElem.style.opacity = 0;
-    qrElem.style.opacity = 0;
-    bgElem.style.opacity = 0;
-    txtElem.style.opacity = 0;
-    bottomTxtElem.style.opacity = 0;
+	if (bgElem.style.opacity==1) vibration.start("nudge-max");
+    loaderElem.style.display = 'none';
+    qrElem.style.display = 'none';
+    bgElem.style.display = 'none';
+    txtElem.style.display = 'none';
+    bottomTxtElem.style.display = 'none';
 }
 
 export function setQrImage(image) {
